@@ -6,7 +6,8 @@ class Desk {
      */
     private $figures = [];
 
-    private $isLastBlack;
+    /** @var Figure */
+    private $lastFigure;
 
     public function __construct() {
         $this->figures['a'][1] = new Rook(false);
@@ -61,15 +62,20 @@ class Desk {
             throw new \Exception("No figure at start position");
         }
 
-        if($this->isLastBlack === $this->figures[$xFrom][$yFrom]->isBlack()) {
+        if (!empty($this->lastFigure) && $this->lastFigure->isBlack() === $this->figures[$xFrom][$yFrom]->isBlack()) {
             throw new \Exception("Incorrect sequence of moves");
         }
-
-        $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
-        $this->figures[$xTo][$yTo]->setHadMoved();
-        unset($this->figures[$xFrom][$yFrom]);
-
-        $this->isLastBlack = $this->figures[$xTo][$yTo]->isBlack();
+        try {
+            //figure level validation rules
+            if ($this->figures[$xFrom][$yFrom]->validate($xFrom, $yFrom, $xTo, $yTo, $this->figures, $this->lastFigure)) {
+                $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
+                $this->figures[$xTo][$yTo]->setLastMove(['xFrom' => $xFrom, 'yFrom' => $yFrom, 'xTo' => $xTo, 'yTo' => $yTo]);
+                unset($this->figures[$xFrom][$yFrom]);
+                $this->lastFigure = $this->figures[$xTo][$yTo];
+            }
+        } catch (\Exception $e) {
+            throw  new \Exception($e->getMessage(). " at $move");
+        }
     }
 
     public function dump() {
