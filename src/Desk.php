@@ -1,7 +1,12 @@
 <?php
 
 class Desk {
+    /**
+     * @var Figure[][]
+     */
     private $figures = [];
+
+    private $isLastBlack;
 
     public function __construct() {
         $this->figures['a'][1] = new Rook(false);
@@ -51,10 +56,20 @@ class Desk {
         $xTo   = $match[3];
         $yTo   = $match[4];
 
-        if (isset($this->figures[$xFrom][$yFrom])) {
-            $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
+        //desk level validation rules
+        if(!isset($this->figures[$xFrom][$yFrom])) {
+            throw new \Exception("No figure at start position");
         }
+
+        if($this->isLastBlack === $this->figures[$xFrom][$yFrom]->isBlack()) {
+            throw new \Exception("Incorrect sequence of moves");
+        }
+
+        $this->figures[$xTo][$yTo] = $this->figures[$xFrom][$yFrom];
+        $this->figures[$xTo][$yTo]->setHadMoved();
         unset($this->figures[$xFrom][$yFrom]);
+
+        $this->isLastBlack = $this->figures[$xTo][$yTo]->isBlack();
     }
 
     public function dump() {

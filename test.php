@@ -17,6 +17,13 @@ class Test extends \PHPUnit\Framework\TestCase {
     }
 
     /**
+     * @group desk
+     */
+    public function testNoFigureAtStartError() {
+        $this->runFile('tests/015-no-figure-at-start-error.test');
+    }
+
+    /**
      * @group rotation
      * @group pawn
      */
